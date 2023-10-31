@@ -2,7 +2,6 @@ import os
 import sys
 import shutil
 import xmltodict
-from bs4 import BeautifulSoup
 
 # If no argument is provided, default to './svgs'
 base_dir = sys.argv[1] if len(sys.argv) > 1 else './test-data'
@@ -13,18 +12,19 @@ def parse_svg_xmltodict(file_path):
     with open(file_path, 'r') as file:
         return xmltodict.parse(file.read())
 
-
-def parse_svg_bs4(file_path):
-    with open(file_path, 'r') as file:
-        return BeautifulSoup(file, 'xml')
-
+# checks for any red circles in the svg
+def any_red_circles(svg_dict):
+    return False;
 
 # Determine the category based on SVG content
 def determine_category(file_path):
     # use the following variable if you prefer xmltodict
     svg_dict = parse_svg_xmltodict(file_path)
+    if (any_red_circles(svg_dict)):
+        return 3;
+    print(svg_dict)
+    exit(0)
     # use the following variable if you prefer Beautiful Soup
-    soup = parse_svg_bs4(file_path)
     # TODO add rules here
     return -1
 
@@ -45,7 +45,8 @@ def copy_file_to_sub_folder(file, category):
 def process_svg_files():
     for file in os.listdir(os.path.join(base_dir, "input")):
         if file.endswith('.svg'):
-            category = determine_category(os.path.join(base_dir, "input", file))
+            category = determine_category(
+                os.path.join(base_dir, "input", file))
             category_str = ""
             # Convert category number to string
             switcher = {

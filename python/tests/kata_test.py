@@ -1,4 +1,5 @@
 import unittest
+from ..src.lhasakata.kata import any_red_circles
 
 
 class MyTestCase(unittest.TestCase):
