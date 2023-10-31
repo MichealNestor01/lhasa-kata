@@ -36,3 +36,4 @@ build/
 
 ### PYTHON ###
 .env
+lhasa_kata.egg-info
