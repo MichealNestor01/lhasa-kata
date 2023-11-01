@@ -6,6 +6,8 @@ Completed this kata after attending the software crafters event: "Exploring Scie
 
 It was a great event which allowed me to learn python unit testing and put it into practice with an interesting problem.
 
+My implementation is in the python directory.
+
 #
 
 ### What we’re going to build
