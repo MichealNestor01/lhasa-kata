@@ -99,13 +99,20 @@ def count_svg_elements(svg_dict):
 # compare == -1, all lines less than length
 # compare == 0, all lines equal to length
 # compare == 1, all lines more than length
-def check_line_length(line_dict, target_length, compare):
-    x1 = int(line_dict["@x1"])
-    x2 = int(line_dict["@x2"])
-    y1 = int(line_dict["@y1"])
-    y2 = int(line_dict["@y2"])
+def check_line_length(line_dict, args):
+    target_length = args.get("target_length")
+    compare = args.get("compare")
+    x1 = line_dict.get("@x1")
+    x2 = line_dict.get("@x2")
+    y1 = line_dict.get("@y1")
+    y2 = line_dict.get("@y2")
+    if x1 is None or x2 is None or y1 is None or y2 is None or target_length is None or compare is None:
+        return False # missing/invalid points or args
     # get length:
-    length = math.sqrt(abs(x2-x1)**2 + abs(y2-y1)**2)
+    try:
+        length = math.sqrt(abs(float(x2)-float(x1))**2 + abs(float(y2)-float(y1))**2)
+    except TypeError: # ensure points are numbers
+        return False
     if compare == -1:
         return length < target_length
     elif compare == 0:
@@ -114,15 +121,40 @@ def check_line_length(line_dict, target_length, compare):
         return length > target_length
     return False # invalid compare value
 
-# requires a llinene to exist
-def compare_all_shape_with_attribute(svg_dict, shape, attribute_checker, target_value, compare):
+# compare == -1, all attribute less than val
+# compare == 0, all attribute equal to val
+# compare == 1, all attribute more than val
+def compare_shape_attribute(shape_dict, args):
+    target = args.get("target")
+    attribute = args.get("attribute")
+    compare = args.get("compare")
+    if target is None or attribute is None or compare is None:
+        return False # missing args
+    val = shape_dict.get(attribute)
+    if val is None:
+        return False # missing matching attribute
+    # get convert val to number:
+    try:
+        val = float(val)
+    except TypeError: # ensure points are numbers
+        return False
+    if compare == -1:
+        return val < target
+    elif compare == 0:
+        return val == target
+    elif compare == 1:
+        return val > target
+    return False # invalid compare value
+
+# requires a line to exist
+def compare_all_shape_with_attribute(svg_dict, shape, attribute_checker, checker_args):
     if shape in svg_dict:
         if type(svg_dict[shape]) == list:
             for line in svg_dict[shape]:
-                if not attribute_checker(line, target_value, compare):
+                if not attribute_checker(line, checker_args):
                     return False
         else:
-            if not attribute_checker(svg_dict[shape], target_value, compare):
+            if not attribute_checker(svg_dict[shape], checker_args):
                 return False
     else:
         return False
@@ -166,7 +198,7 @@ def determine_category(file_path):
 
     # check for line:
     if "line" in svg_dict:
-        if compare_all_shape_with_attribute(svg_dict, "shape", check_line_length, 100, compare=1):
+        if compare_all_shape_with_attribute(svg_dict, "shape", check_line_length, {"target_length": 100, "compare": 1}):
             return 2
         return 3
     
