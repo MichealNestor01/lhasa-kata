@@ -99,32 +99,33 @@ def count_svg_elements(svg_dict):
 # compare == -1, all lines less than length
 # compare == 0, all lines equal to length
 # compare == 1, all lines more than length
-# requires a line to exist
-def compare_all_lines_with_length(svg_dict, target_length, compare):
-    def check_line_length(line_dict, target_length, compare):
-        x1 = int(line_dict["@x1"])
-        x2 = int(line_dict["@x2"])
-        y1 = int(line_dict["@y1"])
-        y2 = int(line_dict["@y2"])
-        # get length:
-        length = math.sqrt(abs(x2-x1)**2 + abs(y2-y1)**2)
-        if compare == -1 and length > target_length:
-            return False
-        elif compare == 0 and length != target_length:
-            return False
-        elif compare == 1 and length < target_length:
-            return False
-        return True
-    if "line" in svg_dict:
-        if type(svg_dict["line"]) == list:
-            for line in svg_dict["line"]:
-                if not check_line_length(line, target_length, compare):
+def check_line_length(line_dict, target_length, compare):
+    x1 = int(line_dict["@x1"])
+    x2 = int(line_dict["@x2"])
+    y1 = int(line_dict["@y1"])
+    y2 = int(line_dict["@y2"])
+    # get length:
+    length = math.sqrt(abs(x2-x1)**2 + abs(y2-y1)**2)
+    if compare == -1:
+        return length < target_length
+    elif compare == 0:
+        return length == target_length
+    elif compare == 1:
+        return length > target_length
+    return False # invalid compare value
+
+# requires a llinene to exist
+def compare_all_shape_with_attribute(svg_dict, shape, attribute_checker, target_value, compare):
+    if shape in svg_dict:
+        if type(svg_dict[shape]) == list:
+            for line in svg_dict[shape]:
+                if not attribute_checker(line, target_value, compare):
                     return False
         else:
-            if not check_line_length(svg_dict["line"], target_length, compare):
+            if not attribute_checker(svg_dict[shape], target_value, compare):
                 return False
     else:
-        return False;
+        return False
     return True
 
 
@@ -165,9 +166,13 @@ def determine_category(file_path):
 
     # check for line:
     if "line" in svg_dict:
-        if compare_all_lines_with_length(svg_dict, 100, compare=1):
+        if compare_all_shape_with_attribute(svg_dict, "shape", check_line_length, 100, compare=1):
             return 2
         return 3
+    
+    # check for elipse in shape
+    if "elipse" in svg_dict:
+        pass
     
     # use the following variable if you prefer Beautiful Soup
     # TODO add rules here

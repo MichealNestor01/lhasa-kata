@@ -1,5 +1,15 @@
 import unittest
-from src.lhasakata.kata import any_red_circles, count_svg_elements, any_colour_of_shape, only_colour_of_shape, blue_circles_categorisation, text_containing_message, compare_all_lines_with_length
+from src.lhasakata.kata import any_red_circles, count_svg_elements, any_colour_of_shape, only_colour_of_shape, blue_circles_categorisation, text_containing_message, compare_all_shape_with_attribute, check_line_length
+
+# fake functions used for testing
+def return_true(*args):
+    return True
+
+def return_false(*args):
+    return False
+
+def echo_first(val, *args):
+    return val
 
 
 class TestAnyRedCircles(unittest.TestCase):
@@ -163,97 +173,76 @@ class TestCountSVGElements(unittest.TestCase):
         svg_dict = {"circle": [{'@fill': 'blue'}, {'@fill': 'blue'}, {'circle': {"@fill": "green"}}]}
         self.assertEqual(count_svg_elements(svg_dict), 3)
 
-class TestCompareAllLinesWithLength(unittest.TestCase):
-    def test_no_lines(self):
+class TestCompareAllShapesWithAttribute(unittest.TestCase):
+    def test_no_shapes(self):
         svg_dict = {}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 10, 0))
+        self.assertFalse(compare_all_shape_with_attribute(svg_dict, "rect", return_true, None, None))
 
-    def test_less_1_false(self):
-        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 4, -1))
-    
-    def test_less_1_true(self):
-        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
-        self.assertTrue(compare_all_lines_with_length(svg_dict, 6, -1))
+    def test_no_matching_shapes(self):
+        svg_dict = {"line": {}}
+        self.assertFalse(compare_all_shape_with_attribute(svg_dict, "rect", return_true, None, None))
 
-    def test_less_2_false(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "6"}
-        ]}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 4, -1))
-    
-    def test_less_2_true(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "6"}
-        ]}
-        self.assertTrue(compare_all_lines_with_length(svg_dict, 8, -1))
-    
-    def test_less_1_true_1_false(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "100", "@y2": "100"}
-        ]}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 20, -1))
+    def test_a_matching_shape_comp_fail(self):
+        svg_dict = {"line": {}}
+        self.assertFalse(compare_all_shape_with_attribute(svg_dict, "line", return_false, None, None))
 
-    def test_equal_1_false(self):
-        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 4, 0))
-    
-    def test_equal_1_true(self):
-        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
-        self.assertTrue(compare_all_lines_with_length(svg_dict, 5, 0))
+    def test_a_matching_shape_comp_pass(self):
+        svg_dict = {"line": {}}
+        self.assertTrue(compare_all_shape_with_attribute(svg_dict, "line", return_true, None, None))
 
-    def test_equal_2_false(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "6"}
-        ]}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 2, 0))
-    
-    def test_equal_2_true(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "5"}
-        ]}
-        self.assertTrue(compare_all_lines_with_length(svg_dict, 5, 0))
-    
-    def test_equal_1_true_1_false(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "100", "@y2": "100"}
-        ]}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 5, 0))
+    def test_matching_shapes_some_comp_fail(self):
+        svg_dict = {"line": [True, False]}
+        self.assertFalse(compare_all_shape_with_attribute(svg_dict, "line", echo_first, None, None))
 
-    def test_more_1_false(self):
-        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 6, 1))
-    
-    def test_more_1_true(self):
-        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
-        self.assertTrue(compare_all_lines_with_length(svg_dict, 4, 1))
+    def test_matching_shapes_all_comp_pass(self):
+        svg_dict = {"line": [True, True]}
+        self.assertTrue(compare_all_shape_with_attribute(svg_dict, "line", echo_first, None, None))
 
-    def test_more_2_false(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "6"}
-        ]}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 10, 1))
+    def test_matching_shapes_some_comp_fail(self):
+        svg_dict = {"line": [True, False]}
+        self.assertFalse(compare_all_shape_with_attribute(svg_dict, "line", echo_first, None, None))
+
+    def test_matching_shapes_all_comp_pass(self):
+        svg_dict = {"line": [True, False], "rect": [True, True]}
+        self.assertTrue(compare_all_shape_with_attribute(svg_dict, "rect", echo_first, None, None))
+
+class TestCheckLineLength(unittest.TestCase):
+    length_5 = {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"};
+
+    def test_less_with_less(self):
+        self.assertTrue(check_line_length(self.length_5, 6, -1))
     
-    def test_more_2_true(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "20", "@y2": "-45"}
-        ]}
-        self.assertTrue(compare_all_lines_with_length(svg_dict, 3, 1))
+    def test_less_with_equal(self):
+        self.assertFalse(check_line_length(self.length_5, 5.0, -1))
+
+    def test_less_with_more(self):
+        self.assertFalse(check_line_length(self.length_5, 4, -1))
     
-    def test_more_1_true_1_false(self):
-        svg_dict = {"line": [
-            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
-            {"@x1": "0", "@y1": "0", "@x2": "100", "@y2": "100"}
-        ]}
-        self.assertFalse(compare_all_lines_with_length(svg_dict, 40, 1))
+    def test_equal_with_less(self):
+        self.assertFalse(check_line_length(self.length_5, 6, 0))
+    
+    def test_equal_with_equal(self):
+        self.assertTrue(check_line_length(self.length_5, 5, 0))
+
+    def test_equal_with_more(self):
+        self.assertFalse(check_line_length(self.length_5, 4, 0))
+
+    def test_more_with_less(self):
+        self.assertFalse(check_line_length(self.length_5, 6, 1))
+    
+    def test_more_with_equal(self):
+        self.assertFalse(check_line_length(self.length_5, 5, 1))
+
+    def test_more_with_more(self):
+        self.assertTrue(check_line_length(self.length_5, 4, 1))
+
+    def test_diagonal(self):
+        length_5_dagonal = {"@x1": "0", "@y1": "4", "@x2": "3", "@y2": "0"};
+        self.assertTrue(check_line_length(length_5_dagonal, 5, 0))
+
+    def test_negative_point(self):
+        length_5_dagonal_cross_axis = {"@x1": "-4", "@y1": "2", "@x2": "-7", "@y2": "-2"};
+        self.assertTrue(check_line_length(length_5_dagonal_cross_axis, 5, 0))
 
 if __name__ == '__main__':  
     unittest.main()
