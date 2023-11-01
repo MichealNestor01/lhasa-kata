@@ -37,3 +37,4 @@ build/
 ### PYTHON ###
 .env
 lhasa_kata.egg-info
+__pycache__
