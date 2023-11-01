@@ -205,6 +205,18 @@ class TestCompareAllShapesWithAttribute(unittest.TestCase):
     def test_matching_shapes_all_comp_pass(self):
         svg_dict = {"line": [True, False], "rect": [True, True]}
         self.assertTrue(compare_all_shape_with_attribute(svg_dict, "rect", echo_first, None))
+    
+    def test_any_matching_shapes_one_of_many_comp_pass(self):
+        svg_dict = {"line": [True, False], "rect": [False, True]}
+        self.assertTrue(compare_all_shape_with_attribute(svg_dict, "rect", echo_first, None, any_satisfy=True))
+
+    def test_any_matching_shapes_a_comp_pass(self):
+        svg_dict = {"line": [True, False], "rect": True}
+        self.assertTrue(compare_all_shape_with_attribute(svg_dict, "rect", echo_first, None, any_satisfy=True))
+
+    def test_any_no_matching_shapes(self):
+        svg_dict = {"line": [True, False], "elipse": True}
+        self.assertFalse(compare_all_shape_with_attribute(svg_dict, "rect", echo_first, None, any_satisfy=True))
 
 class TestCheckLineLength(unittest.TestCase):
     length_5 = {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"};

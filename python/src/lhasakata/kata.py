@@ -147,15 +147,25 @@ def compare_shape_attribute(shape_dict, args):
     return False # invalid compare value
 
 # requires a line to exist
-def compare_all_shape_with_attribute(svg_dict, shape, attribute_checker, checker_args):
+# any_satisfy = True: check a shape exists with given attribute
+# any_satisfy = False: check all shapes exist with given attribute
+def compare_all_shape_with_attribute(svg_dict, shape, attribute_checker, checker_args, any_satisfy=False):
     if shape in svg_dict:
         if type(svg_dict[shape]) == list:
-            for line in svg_dict[shape]:
-                if not attribute_checker(line, checker_args):
-                    return False
+            for item in svg_dict[shape]:
+                has_attr = attribute_checker(item, checker_args)
+                if any_satisfy:
+                    if has_attr:
+                        return True
+                elif not has_attr:
+                    return False   
         else:
-            if not attribute_checker(svg_dict[shape], checker_args):
-                return False
+            has_attr = attribute_checker(svg_dict[shape], checker_args)
+            if any_satisfy:
+                if has_attr:
+                    return True
+            elif not has_attr:
+                return False   
     else:
         return False
     return True
