@@ -268,10 +268,9 @@ def determine_category(file_path):
     if not compare_any_with_attribute(svg_dict, compare_shape_attribute, {"target": 1, "attribute":"@opacity", "compare": -1}):
         return 3
     
-
-    # use the following variable if you prefer Beautiful Soup
-    # TODO add rules here
-    return -1
+    if elemet_count > 5:
+        return 1
+    return 2
 
 
 # Copy the SVG file to its respective sub-folder based on its category
