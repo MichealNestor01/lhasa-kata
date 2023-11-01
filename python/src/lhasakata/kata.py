@@ -121,6 +121,29 @@ def check_line_length(line_dict, args):
         return length > target_length
     return False # invalid compare value
 
+# compare == -1, all lines less than length
+# compare == 0, all lines equal to length
+# compare == 1, all lines more than length
+def check_rect_area(line_dict, args):
+    target_area = args.get("target_area")
+    compare = args.get("compare")
+    height = line_dict.get("@height")
+    width = line_dict.get("@width")
+    if height is None or width is None or target_area is None or compare is None:
+        return False # missing/invalid points or args
+    # get length:
+    try:
+        area = float(height) * float(width) 
+    except TypeError: # ensure points are numbers
+        return False
+    if compare == -1:
+        return area < target_area
+    elif compare == 0:
+        return area == target_area
+    elif compare == 1:
+        return area > target_area
+    return False # invalid compare value
+
 # compare == -1, all attribute less than val
 # compare == 0, all attribute equal to val
 # compare == 1, all attribute more than val
@@ -146,7 +169,7 @@ def compare_shape_attribute(shape_dict, args):
         return val > target
     return False # invalid compare value
 
-# requires a line to exist
+# requires a shape to exist
 # any_satisfy = True: check a shape exists with given attribute
 # any_satisfy = False: check all shapes exist with given attribute
 def compare_all_shape_with_attribute(svg_dict, shape, attribute_checker, checker_args, any_satisfy=False):
@@ -170,6 +193,20 @@ def compare_all_shape_with_attribute(svg_dict, shape, attribute_checker, checker
         return False
     return True
 
+# requires a shape to exist
+# any_satisfy = True: check any shape exists with given attribute
+# any_satisfy = False: check all shapes exist with given attribute
+def compare_any_with_attribute(svg_dict, attribute_checker, checker_args):
+    for element in SVG_ELEMENTS: 
+        if element in svg_dict:
+            if type(svg_dict[element]) == list:
+                for item in svg_dict[element]:
+                    if attribute_checker(item, checker_args):
+                        return True
+            else:
+                if attribute_checker(svg_dict[element], checker_args):
+                    return True 
+    return False
 
 # Determine the category based on SVG content
 def determine_category(file_path):
@@ -203,19 +240,35 @@ def determine_category(file_path):
             return 1
 
     # check more then one element in the file
-    if count_svg_elements(svg_dict) > 1:
+    elemet_count = count_svg_elements(svg_dict)
+    if elemet_count > 1:
         return 1
 
     # check for line:
     if "line" in svg_dict:
-        if compare_all_shape_with_attribute(svg_dict, "shape", check_line_length, {"target_length": 100, "compare": 1}):
+        if compare_all_shape_with_attribute(svg_dict, "line", check_line_length, {"target_length": 100, "compare": 1}):
             return 2
         return 3
     
     # check for elipse in shape
     if "elipse" in svg_dict:
-        pass
+        # check for any with height greater then 50
+        if compare_all_shape_with_attribute(svg_dict, "elipse", compare_shape_attribute, {"target": 49.499, "attribute":"@height", "compare": 1}, any_satisfy=True):
+            return 3
+        # check any rectangle with area greater then 300
+        if "rect" in svg_dict:
+            if compare_all_shape_with_attribute(svg_dict, "rect", check_rect_area, {"target_area": 299.499, "compare": 1}, any_satisfy=True):
+                return 1
+        # check element count
+        if elemet_count > 5:
+            return 2
+        return 3
     
+    # check any elements with opacity less than 1
+    if not compare_any_with_attribute(svg_dict, compare_shape_attribute, {"target": 1, "attribute":"@opacity", "compare": -1}):
+        return 3
+    
+
     # use the following variable if you prefer Beautiful Soup
     # TODO add rules here
     return -1

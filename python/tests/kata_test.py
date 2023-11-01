@@ -1,5 +1,5 @@
 import unittest
-from src.lhasakata.kata import any_red_circles, count_svg_elements, any_colour_of_shape, only_colour_of_shape, blue_circles_categorisation, text_containing_message, compare_all_shape_with_attribute, check_line_length, compare_shape_attribute
+from src.lhasakata.kata import any_red_circles, check_rect_area, compare_any_with_attribute, count_svg_elements, any_colour_of_shape, only_colour_of_shape, blue_circles_categorisation, text_containing_message, compare_all_shape_with_attribute, check_line_length, compare_shape_attribute
 
 # fake functions used for testing
 def return_true(*args):
@@ -218,6 +218,16 @@ class TestCompareAllShapesWithAttribute(unittest.TestCase):
         svg_dict = {"line": [True, False], "elipse": True}
         self.assertFalse(compare_all_shape_with_attribute(svg_dict, "rect", echo_first, None, any_satisfy=True))
 
+class TestCompareAnyWithAttribute(unittest.TestCase):
+    def test_no_elements(self):
+        self.assertFalse(compare_any_with_attribute({}, return_true, None))
+
+    def test_element_comp_fail(self):
+        self.assertFalse(compare_any_with_attribute({"line": {}}, return_false, None))
+
+    def test_element_comp_success(self):
+        self.assertTrue(compare_any_with_attribute({"line": {}}, return_true, None))
+
 class TestCheckLineLength(unittest.TestCase):
     length_5 = {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"};
 
@@ -249,19 +259,58 @@ class TestCheckLineLength(unittest.TestCase):
         self.assertTrue(check_line_length(self.length_5, {"target_length":4, "compare":1}))
 
     def test_diagonal(self):
-        length_5_dagonal = {"@x1": "0", "@y1": "4", "@x2": "3", "@y2": "0"};
+        length_5_dagonal = {"@x1": "0", "@y1": "4", "@x2": "3", "@y2": "0"}
         self.assertTrue(check_line_length(length_5_dagonal, {"target_length":5, "compare":0}))
 
     def test_negative_point(self):
-        length_5_dagonal_cross_axis = {"@x1": "-4", "@y1": "2", "@x2": "-7", "@y2": "-2"};
+        length_5_dagonal_cross_axis = {"@x1": "-4", "@y1": "2", "@x2": "-7", "@y2": "-2"}
         self.assertTrue(check_line_length(length_5_dagonal_cross_axis, {"target_length":5, "compare":0}))
 
     def test_misslabelled_point(self):
-        misslabelled_point = {"x1": "-4", "@y1": "2", "@x2": "-7", "@y2": "-2"};
+        misslabelled_point = {"x1": "-4", "@y1": "2", "@x2": "-7", "@y2": "-2"}
         self.assertFalse(check_line_length(misslabelled_point, {"target_length":0, "compare":0}))
 
     def test_none_number_point(self):
-        none_number_point = {"x1": "four", "@y1": "2", "@x2": "-7", "@y2": "-2"};
+        none_number_point = {"x1": "four", "@y1": "2", "@x2": "-7", "@y2": "-2"}
+        self.assertFalse(check_line_length(none_number_point, {"target_length":0, "compare":0}))
+
+
+class TestCheckRectArea(unittest.TestCase):
+    area_25 = {"@width": "5", "@height": "5"};
+
+    def test_less_with_less(self):
+        self.assertTrue(check_rect_area(self.area_25, {"target_area":26, "compare":-1}))
+    
+    def test_less_with_equal(self):
+        self.assertFalse(check_rect_area(self.area_25, {"target_area":25, "compare":-1}))
+
+    def test_less_with_more(self):
+        self.assertFalse(check_rect_area(self.area_25, {"target_area":24, "compare":-1}))
+    
+    def test_equal_with_less(self):
+        self.assertFalse(check_rect_area(self.area_25, {"target_area":26, "compare":0}))
+    
+    def test_equal_with_equal(self):
+        self.assertTrue(check_rect_area(self.area_25, {"target_area":25, "compare":0}))
+
+    def test_equal_with_more(self):
+        self.assertFalse(check_rect_area(self.area_25, {"target_area":24, "compare":0}))
+
+    def test_more_with_less(self):
+        self.assertFalse(check_rect_area(self.area_25, {"target_area":26, "compare":1}))
+    
+    def test_more_with_equal(self):
+        self.assertFalse(check_rect_area(self.area_25, {"target_area":25, "compare":1}))
+
+    def test_more_with_more(self):
+        self.assertTrue(check_rect_area(self.area_25, {"target_area":24, "compare":1}))
+
+    def test_misslabelled_point(self):
+        misslabelled_point = {"@length": "4", "@height": "2"}
+        self.assertFalse(check_line_length(misslabelled_point, {"target_area":0, "compare":0}))
+
+    def test_none_number_point(self):
+        none_number_point = {"@width": "four", "@height": "2"}
         self.assertFalse(check_line_length(none_number_point, {"target_length":0, "compare":0}))
 
 class TestCompareShapeAttribute(unittest.TestCase):
