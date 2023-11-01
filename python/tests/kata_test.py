@@ -166,11 +166,94 @@ class TestCountSVGElements(unittest.TestCase):
 class TestCompareAllLinesWithLength(unittest.TestCase):
     def test_no_lines(self):
         svg_dict = {}
-        self.assertTrue(compare_all_lines_with_length(svg_dict, 10, 0))
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 10, 0))
 
-    # TODO: finish task
-    def finish_tests(self):
-        self.assertTrue(False)
+    def test_less_1_false(self):
+        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 4, -1))
+    
+    def test_less_1_true(self):
+        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
+        self.assertTrue(compare_all_lines_with_length(svg_dict, 6, -1))
 
-if __name__ == '__main__':
+    def test_less_2_false(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "6"}
+        ]}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 4, -1))
+    
+    def test_less_2_true(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "6"}
+        ]}
+        self.assertTrue(compare_all_lines_with_length(svg_dict, 8, -1))
+    
+    def test_less_1_true_1_false(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "100", "@y2": "100"}
+        ]}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 20, -1))
+
+    def test_equal_1_false(self):
+        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 4, 0))
+    
+    def test_equal_1_true(self):
+        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
+        self.assertTrue(compare_all_lines_with_length(svg_dict, 5, 0))
+
+    def test_equal_2_false(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "6"}
+        ]}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 2, 0))
+    
+    def test_equal_2_true(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "5"}
+        ]}
+        self.assertTrue(compare_all_lines_with_length(svg_dict, 5, 0))
+    
+    def test_equal_1_true_1_false(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "100", "@y2": "100"}
+        ]}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 5, 0))
+
+    def test_more_1_false(self):
+        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 6, 1))
+    
+    def test_more_1_true(self):
+        svg_dict = {"line": {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"}}
+        self.assertTrue(compare_all_lines_with_length(svg_dict, 4, 1))
+
+    def test_more_2_false(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "0", "@y2": "6"}
+        ]}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 10, 1))
+    
+    def test_more_2_true(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "20", "@y2": "-45"}
+        ]}
+        self.assertTrue(compare_all_lines_with_length(svg_dict, 3, 1))
+    
+    def test_more_1_true_1_false(self):
+        svg_dict = {"line": [
+            {"@x1": "0", "@y1": "0", "@x2": "5", "@y2": "0"},
+            {"@x1": "0", "@y1": "0", "@x2": "100", "@y2": "100"}
+        ]}
+        self.assertFalse(compare_all_lines_with_length(svg_dict, 40, 1))
+
+if __name__ == '__main__':  
     unittest.main()

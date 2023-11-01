@@ -114,6 +114,7 @@ def compare_all_lines_with_length(svg_dict, target_length, compare):
             return False
         elif compare == 1 and length < target_length:
             return False
+        return True
     if "line" in svg_dict:
         if type(svg_dict["line"]) == list:
             for line in svg_dict["line"]:
