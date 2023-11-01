@@ -9,6 +9,6 @@ setup(
     py_modules=['kata'],  # Specify the script as a module
     install_requires=[
         'beautifulsoup4',
-        # 'xmltodict'
+        'xmltodict'
     ]
 )
